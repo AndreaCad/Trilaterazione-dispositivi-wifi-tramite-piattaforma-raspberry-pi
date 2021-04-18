@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="static/style.css" type="text/css"/ >
+</head>
+  <body>
+    <p id="demo"></p>
+
+
+    <script type="text/javascript">
+      var ipadress = "192.168.1.50"
+      var port = "8765"
+
+      var socket = new WebSocket("ws://192.168.1.50:8765/");
+        //socket.send("Ecco del testo che il server sta aspettando di ricevere!");
+
+        socket.onopen = function (event) {
+            //socket.send("Connection started");
+            console.log("im connected to the server");
+
+        };
+
+
+
+      function startScanning() {
+        var time = parseInt(document.getElementById("time").value);
+        var wlan = (document.getElementById("wlan").value);
+        var altitudine = (document.getElementById("altitudine").value);
+        var gps = (document.getElementById("gps").value);
+        var exp = (document.getElementById("exp").value);
+        socket.send("$scan" + "-" + time + "-" + wlan + "-" + gps + "-" + altitudine + "-" + exp);
+      }
+
+
+      function sendDev() {
+        var date = (document.getElementById("data").value);
+
+        socket.send("$dev" + "-" + date);
+      }
+
+      function trackDevice() {
+        var mac = (document.getElementById("mac").value);
+        var date = (document.getElementById("date").value);
+
+        socket.send("$track" + "-" + mac + "-" + date);
+      }
+
+
+
+
+      socket.onmessage = function (event) {
+
+            var msg = event.data;
+            var split = msg.split("$");
+            var protocol = split[0];
+            var attributes = split[1];
+
+
+            if (protocol == "riv") {
+              var messages = document.getElementsByTagName('ul')[0],
+                  message = document.createElement('li'),
+                  content = document.createTextNode(attributes);
+
+              message.appendChild(content);
+              messages.appendChild(message);
+              document.body.appendChild(messages);
+              document.getElementById("attributes").innerHTML = messages;
+            }
+
+            //console.log(event.data);
+            if (protocol == "dev") {
+                var device = attributes.split('---')[0];
+                createDeviceElement(device);
+            }
+
+
+            if (protocol == "punto") {
+              var x = attributes.split('---')[0];
+              var y = attributes.split('---')[1];
+              var messages = document.getElementsByTagName('ul')[0],
+                  message = document.createElement('li'),
+                  content = document.createTextNode(x + "," + y);
+              message.appendChild(content);
+              messages.appendChild(message);
+              document.body.appendChild(messages);
+            }
+
+        }
+
+
+        function createDeviceElement(device) {
+            var messages = document.getElementById('elenco'),
+                message = document.createElement('li'),
+                createA = document.createElement('a'),
+                button = createDeleteButton("1", "delete"),
+                content = document.createTextNode(device);
+
+
+
+            message.appendChild(createA);
+            createA.appendChild(content);
+            messages.appendChild(message);
+            createA.appendChild(button);
+        }
+
+        function createDeleteButton(id, text) {
+            var button = document.createElement('button');
+            var content = document.createTextNode(text);
+
+            button.setAttribute("id", id);
+            button.setAttribute("value", "Dima");
+            button.setAttribute("class", "deleteDeviceButton");
+
+            button.appendChild(content);
+            return button;
+        }
+        document.body.appendChild(messages)
+      </script>
+        <div class="text">
+          <img class="first_image" src="1_SPrgEN.jpg">
+          <img class="second_image" src="Davoss_Colori.jpg">
+          <h2 class="titolo">RACCOLTA DATI</h2>
+          <div>
+            <span style="float: left;">Esperimento: &nbsp </span>
+            <div>
+              <input type="text" id="exp" style="width: 80px;">
+            </div>
+            <p>
+            <span style="float: left;">Tempo: &nbsp </span>
+            <div>
+              <input type="number" id="time" style="width: 80px;">
+            </div>
+            <p>
+            <span style="float: left;">Interfaccia: &nbsp </span>
+            <div>
+              <input type="text" id="wlan" style="width: 150px;">
+            </div>
+            <p>
+            <span style="float: left;">altitudine: &nbsp </span>
+            <div>
+              <input type="number" id="altitudine" style="width: 80px;">
+            </div>
+            <p>
+            <span style="float: left;">Posizione: &nbsp </span>
+            <div>
+              <input type="number" id="gps" style="width: 150px;">
+            </div>
+            <p>
+            <div>
+              <button onclick=startScanning()>Inizia scansione</button>
+            </div>
+            <h2>DISPOSITIVI SALVATI</h2>
+            <span style="float: left;">data: &nbsp </span>
+            <div>
+              <input type="date" id="data" style="width: 130px;">
+            </div>
+            <p>
+            <div>
+              <button onclick=sendDev()>mostra risultati</button>
+            </div>
+            <p>
+            <h2>TRILATERAZIONE</h2>
+            <span style="float: left;">indirizzo mac: &nbsp </span>
+            <div>
+              <input type="text" id="mac" style="width: 200px;">
+            </div>
+            <p>
+            <span style="float: left;">data: &nbsp </span>
+            <div>
+              <input type="date" id="date" style="width: 130px;">
+            </div>
+            <p>
+            <div>
+              <button onclick=trackDevice()>trova posizione</button>
+          </div>
+          <div>
+                      <h3>sono stati trovati i seguenti dispositivi</h3>
+                      <p id="protocol"></p>
+                      <p id="attributes"></p>
+          </div>
+          <div class="numberlist">
+           <ol id="elenco">
+               <!-- <li><a>Dispositivi <button id=1>delete device</button></a></li> -->
+           </ol>
+         </div>
+        </div>
+  </body>
+</html>
