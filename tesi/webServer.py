@@ -16,7 +16,7 @@ from datetime import date
 
 # print("debug")
 #connessione al db mongodb
-client = MongoClient("mongodb+srv://progettoreti:gtazmodQsCPwgu2G@cluster0.fmw7q.mongodb.net/wifidata?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://@cluster0.fmw7q.mongodb.net/?retryWrites=true&w=majority")
 db = client.progettoreti
 collection = db["wifidata"]
 # print("debug")
